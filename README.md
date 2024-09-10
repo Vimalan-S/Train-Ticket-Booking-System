@@ -1,3 +1,10 @@
+# Execution commands
+npm run build
+<br />
+npm start
+<br/><br/>
+-------------------------------------------------------------
+
 # Common  Routes:
 
 •	URL:  POST    on    /register
