@@ -1,6 +1,7 @@
 # Common  Routes:
 
 •	URL:  POST    on    /register
+<br />
 Body:
 {
   "username": "testuser3",
@@ -10,6 +11,7 @@ Body:
 
 
 •	URL:  POST    on    /login
+<br />
 Body:
 {
   "username": "testuser3",
