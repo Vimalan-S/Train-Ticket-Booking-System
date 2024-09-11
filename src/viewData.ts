@@ -58,7 +58,7 @@ const fetchData = async (): Promise<void> => {
     const tickets: Ticket[] = await queryDatabase<Ticket>(ticketsQuery);
     console.log('Tickets:');
     console.table(tickets);
-    
+ 
   } catch (error) {
     console.error('Error fetching data:', error);
   } finally {

@@ -78,23 +78,75 @@ router.delete('/:id', (req, res) => {
         res.json({ message: 'User deleted successfully.' });
     });
 });
-// Book a ticket
-router.post('/book-ticket/:trainId', (req, res) => {
-    var _a;
-    const { trainId } = req.params;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
-    /* req as any tells ts to treat req to be having any type..
-       .user is used to access req.user if exists
-       ?.userId is optionally used to get id if userId exists on the req.user
-    */
-    if (!trainId || !userId) {
-        return res.status(400).json({ message: 'Train ID and user ID are required.' });
+// Ask for train name using full-text search
+router.get('/train/:trainName', (req, res) => {
+    const { trainName } = req.params;
+    if (!trainName) {
+        return res.status(400).json({ message: 'TrainName is required.' });
     }
-    const bookTicketQuery = 'INSERT INTO Ticket (userid, trainid) VALUES (?, ?)';
-    db.query(bookTicketQuery, [userId, trainId], (err, results) => {
+    // Use FULLTEXT search with MATCH() AGAINST()
+    const qry = `
+    SELECT * FROM Train 
+    WHERE MATCH(trainName) 
+    AGAINST (? IN NATURAL LANGUAGE MODE)
+  `;
+    db.query(qry, [trainName], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error Fetching Train Data.', err });
+        }
+        res.status(200).json({ results });
+    });
+});
+// Get available seats for a train
+router.get('/seats/:trainid', (req, res) => {
+    const { trainid } = req.params;
+    if (!trainid) {
+        return res.status(400).json({ message: 'Train ID is required.' });
+    }
+    const query = 'SELECT seats FROM Seats WHERE trainid = ?';
+    db.query(query, [trainid], (err, results) => {
         if (err)
-            return res.status(500).json({ message: 'Error booking ticket.', err });
-        res.status(201).json({ message: 'Ticket booked successfully.', ticketId: results.insertId });
+            return res.status(500).json({ message: 'Error fetching seats.', err });
+        if (results.length === 0)
+            return res.status(404).json({ message: 'Seats not found for this train.' });
+        const seats = JSON.parse(results[0].seats);
+        const availableSeats = Object.keys(seats).filter(key => seats[key] === 'not booked');
+        res.json({ availableSeats });
+    });
+});
+// Book a ticket
+router.post('/book-ticket/:trainid/:seatNo', (req, res) => {
+    var _a;
+    const { trainid, seatNo } = req.params;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
+    if (!trainid || !seatNo || !userId) {
+        return res.status(400).json({ message: 'Train ID, seat number, and user ID are required.' });
+    }
+    // First, check if the seat is available
+    const getSeatQuery = 'SELECT seats FROM Seats WHERE trainid = ?';
+    db.query(getSeatQuery, [trainid], (err, results) => {
+        if (err)
+            return res.status(500).json({ message: 'Error fetching seat information.', err });
+        if (results.length === 0)
+            return res.status(404).json({ message: 'Seats not found for this train.' });
+        const seats = JSON.parse(results[0].seats);
+        if (seats[seatNo] !== 'not booked') {
+            return res.status(400).json({ message: 'Seat is already booked.' });
+        }
+        // Update the seat status to booked
+        seats[seatNo] = 'booked';
+        const updateSeatQuery = 'UPDATE Seats SET seats = ? WHERE trainid = ?';
+        db.query(updateSeatQuery, [JSON.stringify(seats), trainid], (err) => {
+            if (err)
+                return res.status(500).json({ message: 'Error updating seat status.', err });
+            // Insert the booking into the Ticket table
+            const bookTicketQuery = 'INSERT INTO Ticket (userid, trainid, seatNo) VALUES (?, ?, ?)';
+            db.query(bookTicketQuery, [userId, trainid, seatNo], (err, results) => {
+                if (err)
+                    return res.status(500).json({ message: 'Error booking ticket.', err });
+                res.status(201).json({ message: 'Ticket booked successfully.', ticketId: results.insertId });
+            });
+        });
     });
 });
 export default router;

@@ -28,6 +28,7 @@ const createTrainsTable = `
     endLocation VARCHAR(255) NOT NULL
   )
 `;
+const fulltext = `ALTER TABLE Train ADD FULLTEXT(trainName)`;
 const createTicketsTable = `
   CREATE TABLE IF NOT EXISTS Ticket (
     ticketid INT AUTO_INCREMENT PRIMARY KEY,
@@ -37,6 +38,17 @@ const createTicketsTable = `
     FOREIGN KEY (trainid) REFERENCES Train(trainid)
   )
 `;
+const seatNoColumn = `ALTER TABLE Ticket
+ADD COLUMN seatNo INT;
+`;
+const createSeatsTable = `
+  CREATE TABLE IF NOT EXISTS Seats (
+    trainid INT PRIMARY KEY,
+    seats JSON,
+    FOREIGN KEY (trainid) REFERENCES Train(trainid)
+  );
+`;
+const alterSeats = `ALTER TABLE Seats MODIFY seats LONGTEXT;`;
 const queryAsync = (query) => __awaiter(void 0, void 0, void 0, function* () {
     return new Promise((resolve, reject) => {
         db.query(query, (err) => {
@@ -56,8 +68,16 @@ function createTables() {
             console.log('User table created or already exists.');
             yield queryAsync(createTrainsTable);
             console.log('Train table created or already exists.');
+            yield queryAsync(fulltext);
+            console.log('Full Text Index created on Train name');
             yield queryAsync(createTicketsTable);
             console.log('Ticket table created or already exists.');
+            yield queryAsync(seatNoColumn);
+            console.log('SeatNo column added');
+            yield queryAsync(createSeatsTable);
+            console.log('Seats table created or already exists.');
+            yield queryAsync(alterSeats);
+            console.log('Seats table longtext altered');
         }
         catch (error) {
             console.error('Error creating tables:', error);
