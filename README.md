@@ -11,9 +11,11 @@ npm start
 <br />
 Body:
 {
-  "username": "testuser3",
+  "name": "testuser3",
   "password": "testpassword3",
-  "role": "admin"
+  "role": "admin",
+  "mobilenumber": "3957392048",
+  "gender": "Male"
 }
 
 
@@ -21,7 +23,7 @@ Body:
 <br />
 Body:
 {
-  "username": "testuser3",
+  "name": "testuser3",
   "password": "testpassword3"
 }
 
@@ -29,21 +31,14 @@ Body:
 
 # User Routes:
 
-•	URL: POST   on    api/users/add
-<br />
-Body:
-{
-"name": "John Doe",
-"mobilenumber": "1234567890",
-"gender": "Male",
-"role": "regular"
-}
-<br /><br />
 •	URL: GET   on     api/users/
+Header:  Authorization: Bearer <token>
 <br /><br />
 •	URL: GET   on     api/users/:id
+Header:  Authorization: Bearer <token>
 <br /><br />
 •	URL: PUT   on     api/users/:id
+Header:  Authorization: Bearer <token>
 <br />
 Body:
 {
@@ -54,15 +49,19 @@ Body:
 }
 <br /><br />
 •	URL: DELETE   on     api/users/:id
+Header:  Authorization: Bearer <token>
 <br /><br />
-•	URL: POST   on     api/users/book-ticket/:trainId
+•	URL: GET   on     api/users/seats/:trainId
+Header:  Authorization: Bearer <token>
+<br />
+Header:  Authorization: Bearer <token>
+<br /><br />
+
+•	URL: POST   on     api/users/book-ticket/:trainId/:seatNo
 <br />
 Header:  Authorization: Bearer <token>
 <br />
-Body:
-{
-"name" : "John Doe"
-}
+
 
 -------------------------------------------------------------------
 
