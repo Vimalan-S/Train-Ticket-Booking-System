@@ -32,12 +32,15 @@ Body:
 # User Routes:
 
 •	URL: GET   on     api/users/
+<br />
 Header:  Authorization: Bearer <token>
 <br /><br />
 •	URL: GET   on     api/users/:id
+<br />
 Header:  Authorization: Bearer <token>
 <br /><br />
 •	URL: PUT   on     api/users/:id
+<br />
 Header:  Authorization: Bearer <token>
 <br />
 Body:
@@ -49,10 +52,10 @@ Body:
 }
 <br /><br />
 •	URL: DELETE   on     api/users/:id
+<br />
 Header:  Authorization: Bearer <token>
 <br /><br />
 •	URL: GET   on     api/users/seats/:trainId
-Header:  Authorization: Bearer <token>
 <br />
 Header:  Authorization: Bearer <token>
 <br /><br />
